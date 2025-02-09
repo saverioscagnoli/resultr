@@ -153,6 +153,24 @@ function resultr<V, E extends Error>(fn: () => V): Result<V, E> {
   }
 }
 
+/**
+ * Converts a function that returns a promise into a Result.
+ * Very frequently in typescript, it is ignored that widely-used
+ * functions can throw errors. Functions such as JSON.parse, fs.readFileSync,
+ * and many others. This function provides a way to not write the verbiose try-catch
+ * block, and having a nice result object to work with.
+ * @param fn callback function where the problematic function is called
+ * @returns A Result object
+ * @example
+ * ```ts
+ * const result = await resultrAsync(() => fetch('https://json..'));
+ * if (result.isOk()) {
+ *  console.log(result.unwrap());
+ * } else {
+ *  console.error(result.unwrapErr());
+ * }
+ * ```
+ */
 function resultrAsync<V, E extends Error>(
   fn: () => Promise<V>
 ): Promise<Result<V, E>> {
