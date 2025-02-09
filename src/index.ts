@@ -171,16 +171,16 @@ function resultr<V, E extends Error>(fn: () => V): Result<V, E> {
  * }
  * ```
  */
-function resultrAsync<V, E extends Error>(
+async function resultrAsync<V, E extends Error>(
   fn: () => Promise<V>
 ): Promise<Result<V, E>> {
-  return fn()
-    .then(value => Ok(value))
-    .catch(error =>
-      Err(
-        error instanceof Error ? (error as E) : (new Error(String(error)) as E)
-      )
+  try {
+    return Ok(await fn());
+  } catch (error) {
+    return Err(
+      error instanceof Error ? (error as E) : (new Error(String(error)) as E)
     );
+  }
 }
 
 export { Err, Ok, Result, resultr, resultrAsync };
