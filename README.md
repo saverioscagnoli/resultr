@@ -9,7 +9,7 @@ So this library aims to provide a nice and neat way to handle errors.
 ### Problem
 
 Very often in the javascript world, many that could throw an error and crash your
-program are used without the correct error handling, an example is `JSON.parse`
+program are used without the correct error handling, an example is `JSON.parse`:
 
 ```js
 const result = JSON.parse("{ "a": ");
@@ -18,7 +18,7 @@ const result = JSON.parse("{ "a": ");
 
 ### Solution
 
-Use the `Result` type as a return value when you define your functions!\
+Use the `Result` type as a return value when you define your functions!
 
 ```ts
 function couldFail(): Result<number, Error> {
