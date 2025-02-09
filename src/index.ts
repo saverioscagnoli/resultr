@@ -125,4 +125,44 @@ function Err<E extends Error>(error: E): Result<never, E> {
   return new Result(undefined as never, error);
 }
 
-export { Ok, Err, Result };
+/**
+ * Converts a function that can throw an error into a Result.
+ * Very frequently in typescript, it is ignored that widely-used
+ * functions can throw errors. Functions such as JSON.parse, fs.readFileSync,
+ * and many others. This function provides a way to not write the verbiose try-catch
+ * block, and having a nice result object to work with.
+ * @param fn callback function where the problematic function is called
+ * @returns A Result object
+ * @example
+ * ```ts
+ * const result = resultr(() => JSON.parse('{"key": "value"}'));
+ * if (result.isOk()) {
+ *  console.log(result.unwrap());
+ * } else {
+ * console.error(result.unwrapErr());
+ * }
+ * ```
+ */
+function resultr<V, E extends Error>(fn: () => V): Result<V, E> {
+  try {
+    return Ok(fn());
+  } catch (error) {
+    return Err(
+      error instanceof Error ? (error as E) : (new Error(String(error)) as E)
+    );
+  }
+}
+
+function resultrAsync<V, E extends Error>(
+  fn: () => Promise<V>
+): Promise<Result<V, E>> {
+  return fn()
+    .then(value => Ok(value))
+    .catch(error =>
+      Err(
+        error instanceof Error ? (error as E) : (new Error(String(error)) as E)
+      )
+    );
+}
+
+export { Err, Ok, Result, resultr, resultrAsync };
