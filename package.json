@@ -1,0 +1,21 @@
+{
+  "name": "resultr",
+  "license": "MIT",
+  "repository": "https://github.com/saverioscagnoli/resultr.git",
+  "author": "svscagn <95577971+saverioscagnoli@users.noreply.github.com>",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "lint": "tsc",
+    "test": "vitest --watch=false",
+    "format": "prettier --write . --ignore-unknown",
+    "build": "yarn lint && yarn format && yarn test && tsup"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  }
+}

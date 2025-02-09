@@ -1,0 +1,9 @@
+.vscode
+node_modules
+src
+.gitignore
+.prettierrc
+README.md
+tsup.config.ts
+vite.config.ts
+yarn.lock
