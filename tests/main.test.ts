@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { Ok, Err, Result, resultr, resultrAsync } from "../src/index";
+import { Ok, Err, Result, resultr } from "../src/index";
 
 test("Result with value", () => {
   const successfulFunction = (): Result<string, Error> => {
@@ -44,7 +44,7 @@ test("resultr function", async () => {
 
   const invalidUrl = "abc";
 
-  const result3 = await resultrAsync(() => fetch(invalidUrl));
+  const result3 = await resultr(() => fetch(invalidUrl));
 
   expect(result3.isOk()).toBe(false);
   expect(result3.isErr()).toBe(true);
@@ -52,8 +52,8 @@ test("resultr function", async () => {
 
   const validUrl = "https://jsonplaceholder.typicode.com/todos/1";
 
-  const result4 = await resultrAsync(() => fetch(validUrl));
-  const json = await resultrAsync(() => result4.unwrap().json());
+  const result4 = await resultr(() => fetch(validUrl));
+  const json = await resultr(() => result4.unwrap().json());
 
   expect(result4.isOk()).toBe(true);
   expect(result4.isErr()).toBe(false);

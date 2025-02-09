@@ -51,7 +51,7 @@ class Result<V, E extends Error> {
    * NOTE: if this returns true, then the error is guaranteed to be undefined.
    */
   public isErr(): boolean {
-    return this.error !== undefined;
+    return !this.isOk();
   }
 
   /**
@@ -125,6 +125,8 @@ function Err<E extends Error>(error: E): Result<never, E> {
   return new Result(undefined as never, error);
 }
 
+type SyncOrAsync<V> = V | Promise<V>;
+
 /**
  * Converts a function that can throw an error into a Result.
  * Very frequently in typescript, it is ignored that widely-used
@@ -137,45 +139,49 @@ function Err<E extends Error>(error: E): Result<never, E> {
  * ```ts
  * const result = resultr(() => JSON.parse('{"key": "value"}'));
  * if (result.isOk()) {
- *  console.log(result.unwrap());
+ *    console.log(result.unwrap());
  * } else {
- * console.error(result.unwrapErr());
+ *    console.error(result.unwrapErr());
  * }
  * ```
- */
-function resultr<V, E extends Error>(fn: () => V): Result<V, E> {
-  try {
-    return Ok(fn());
-  } catch (error) {
-    return Err(
-      error instanceof Error ? (error as E) : (new Error(String(error)) as E)
-    );
-  }
-}
-
-/**
- * Converts a function that returns a promise into a Result.
- * Very frequently in typescript, it is ignored that widely-used
- * functions can throw errors. Functions such as JSON.parse, fs.readFileSync,
- * and many others. This function provides a way to not write the verbiose try-catch
- * block, and having a nice result object to work with.
- * @param fn callback function where the problematic function is called
- * @returns A Result object
+ *
+ * If the callback function returns a Promise, the function will return a Promise<Result<V, E>>,
+ * so you the function can be awaited.
+ *
  * @example
  * ```ts
- * const result = await resultrAsync(() => fetch('https://json..'));
+ * const result = await resultr(() => fetch('https://jsonplaceholder.typicode.com/todos/1'));
  * if (result.isOk()) {
- *  console.log(result.unwrap());
+ *    const json = await result.unwrap().json();
+ *    console.log(json);
  * } else {
- *  console.error(result.unwrapErr());
+ *    console.error(result.unwrapErr());
  * }
  * ```
  */
-async function resultrAsync<V, E extends Error>(
+function resultr<V, E extends Error>(
   fn: () => Promise<V>
-): Promise<Result<V, E>> {
+): Promise<Result<V, E>>;
+function resultr<V, E extends Error>(fn: () => V): Result<V, E>;
+function resultr<V, E extends Error>(
+  fn: () => SyncOrAsync<V>
+): SyncOrAsync<Result<V, E>> {
   try {
-    return Ok(await fn());
+    const result = fn();
+
+    if (result instanceof Promise) {
+      return result
+        .then(Ok)
+        .catch(error =>
+          Err(
+            error instanceof Error
+              ? (error as E)
+              : (new Error(String(error)) as E)
+          )
+        ) as Promise<Result<V, E>>;
+    } else {
+      return Ok(result);
+    }
   } catch (error) {
     return Err(
       error instanceof Error ? (error as E) : (new Error(String(error)) as E)
@@ -183,4 +189,4 @@ async function resultrAsync<V, E extends Error>(
   }
 }
 
-export { Err, Ok, Result, resultr, resultrAsync };
+export { Err, Ok, Result, resultr };
